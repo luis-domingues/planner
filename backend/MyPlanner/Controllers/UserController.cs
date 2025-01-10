@@ -73,4 +73,43 @@ public class UserController : ControllerBase
             userId = existingUser.Id
         });
     }
+
+    [HttpGet("getUserInfo")]
+    public IActionResult GetUserInfo(int id)
+    {
+        if (id <= 0) return BadRequest("ID inválido");
+        
+        var user = _context.Users
+            .Where(u => u.Id == id)
+            .Select(u => new
+            {
+                u.Id,
+                u.Username,
+                u.MobilePhone
+            })
+            .FirstOrDefault();
+
+        if (user == null) return NotFound("Usuário não encontrado");
+        
+        return Ok(user);
+    }
+
+    [HttpDelete("deleteUser/{id}")]
+    public IActionResult DeleteUser(int id)
+    {
+        var user = _context.Users
+            .FirstOrDefault(u => u.Id == id);
+
+        if (user == null)
+            return NotFound("Usuário não encontrado");
+
+        _context.Users.Remove(user);
+        _context.SaveChanges();
+
+        return Ok(new
+        {
+            Message = "Usuário excluído com sucesso",
+            UserId = id
+        });
+    }
 }
